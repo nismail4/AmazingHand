@@ -1,0 +1,8 @@
+nodes:
+  - id: move_angle
+    build: pip install -e AHSimulation
+    path: AHSimulation/examples/finger_angle_control.py
+    inputs:
+      tick: dora/timer/millis/50
+    outputs:
+      - hand_quat
