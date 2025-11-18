@@ -1,7 +1,7 @@
 nodes:
   - id: move_angle
     _unstable_deploy:
-    machine: razer
+      machine: razer
     build: pip install -e AHSimulation
     path: AHSimulation/examples/finger_angle_control.py
     inputs:
