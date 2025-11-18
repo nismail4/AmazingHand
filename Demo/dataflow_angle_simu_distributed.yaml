@@ -12,7 +12,7 @@ nodes:
     _unstable_deploy:
       machine: thinkpad
     build: pip install -e AHSimulation
-    path: AHSimulation/AHSimulation/mj_mink_right.py
+    path: /home/steve/Project/Repo/Pollen/AmazingHand/Demo/AHSimulation/AHSimulation/mj_mink_right.py
     inputs:
       r_hand_quat: move_angle/hand_quat
       tick: dora/timer/millis/2
@@ -25,7 +25,7 @@ nodes:
     _unstable_deploy:
       machine: thinkpad
     build: pip install -e AHSimulation
-    path: AHSimulation/AHSimulation/mj_mink_left.py
+    path: /home/steve/Project/Repo/Pollen/AmazingHand/Demo/AHSimulation/AHSimulation/mj_mink_left.py
     inputs:
       l_hand_quat: move_angle/hand_quat
       tick: dora/timer/millis/2
