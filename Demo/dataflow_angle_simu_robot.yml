@@ -1,6 +1,8 @@
 nodes:
 
   - id: hand_simulation_r
+    _unstable_deploy:
+    machine: thinkpad
     build: pip install -e AHSimulation
     path: AHSimulation/AHSimulation/mj_mink_right.py
     inputs:
@@ -12,6 +14,8 @@ nodes:
     args: -m quat
 
   - id: hand_simulation_l
+    _unstable_deploy:
+    machine: thinkpad
     build: pip install -e AHSimulation
     path: AHSimulation/AHSimulation/mj_mink_left.py
     inputs:
