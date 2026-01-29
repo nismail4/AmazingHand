@@ -191,6 +191,10 @@ def process_img(hand_proc, image, finger_lengths):
                 # hand_landmarks=results.multi_hand_landmarks[index] #normalized
                 hand_landmarks_norm = results.multi_hand_landmarks[index]  # normalized
 
+                # PINCH MANAGEMENT
+                pinch_detected = False
+                index_thumb_relative_pos = 0.0
+
                 tip1_x = (
                     hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x
                     - hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].x
@@ -330,11 +334,17 @@ def process_img(hand_proc, image, finger_lengths):
                         )
                         < 0.02
                     ):
-                        print("Thumb close to index tip, adjusting values")
+                        pinch_detected = True
+                        index_thumb_relative_pos = (
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x
+                            - hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_TIP
+                            ].x
+                        )
                         # Fixed values to face index tip position
-                        tip4_x = -0.01
-                        tip4_y = -0.07
-                        tip4_z = -0.03
+                        # tip4_x = -0.01
+                        # tip4_y = -0.07
+                        # tip4_z = 0.0
 
                 if handedness_classif.classification[0].label == "Left":
                     tip4_x = (
@@ -477,9 +487,14 @@ def process_img(hand_proc, image, finger_lengths):
                 tip3 = R @ np.array([tip3_x, tip3_y, tip3_z])
                 tip4 = R @ np.array([tip4_x, tip4_y, tip4_z])
 
+                if pinch_detected:
+                    tip4 = np.array([0.03, -0.03 - index_thumb_relative_pos, 0.1])
+
                 # Adaptation for bent fingers below MCP level
                 if tip1[2] <= 0.02:
                     tip1[1] = 0.0
+                if pinch_detected:
+                    tip1[2] = tip1[2] - 0.015
 
                 # scale=0.01
                 # image = cv2.drawFrameAxes(image, K, disto, rotV, origin, scale)

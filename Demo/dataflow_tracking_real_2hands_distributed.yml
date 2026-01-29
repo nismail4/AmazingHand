@@ -1,0 +1,47 @@
+nodes:
+  - id: hand_tracker
+    _unstable_deploy:
+      machine: laptop
+    build: pip install -e HandTracking
+    path: /home/demo/dev/AmazingHand/Demo/HandTracking/HandTracking/main.py #TODO absolute path
+    env:
+      CURRENT_CALIBRATION_FILE: /home/demo/dev/AmazingHand/Demo/HandTracking/HandTracking/current_calibration.json
+    inputs:
+      tick: dora/timer/millis/50
+    outputs:
+      - r_hand_pos
+      - l_hand_pos
+
+  - id: r_hand_simulation
+    _unstable_deploy:
+      machine: laptop
+    build: pip install -e AHSimulation
+    path: /home/demo/dev/AmazingHand/Demo/AHSimulation/AHSimulation/mj_mink_right.py #TODO absolute path
+    inputs:
+      r_hand_pos: hand_tracker/r_hand_pos
+      tick: dora/timer/millis/2
+      tick_ctrl: dora/timer/millis/10
+    outputs:
+      - mj_r_joints_pos
+
+  - id: l_hand_simulation
+    _unstable_deploy:
+      machine: laptop
+    build: pip install -e AHSimulation
+    path: /home/demo/dev/AmazingHand/Demo/AHSimulation/AHSimulation/mj_mink_left.py #TODO absolute path
+    inputs:
+      l_hand_pos: hand_tracker/l_hand_pos
+      tick: dora/timer/millis/2
+      tick_ctrl: dora/timer/millis/10
+    outputs:
+      - mj_l_joints_pos
+
+  # - id: hand_controller
+  #   _unstable_deploy:
+  #     machine: robot
+  #   build: cargo build -p AHControl
+  #   path: /home/reachy/dev/AmazingHand/Demo/target/debug/AHControl #TODO absolute path
+  #   args: --serialport /dev/grippers --config /home/reachy/dev/AmazingHand/Demo/AHControl/config/2hands.toml #TODO correct tty
+  #   inputs:
+  #     mj_r_joints_pos: r_hand_simulation/mj_r_joints_pos
+  #     mj_l_joints_pos: l_hand_simulation/mj_l_joints_pos
