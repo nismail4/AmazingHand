@@ -29,6 +29,8 @@ import json
 from pathlib import Path
 from typing import Any, Tuple
 
+from one_euro_filter import OneEuroDictFilter
+
 CALIBRATION_KEYS = ("index_finger", "middle_finger", "ring_finger", "thumb")
 
 
@@ -155,7 +157,7 @@ def point_on_line_at_distance(
     return new_point
 
 
-def process_img(hand_proc, image, finger_lengths):
+def process_img(hand_proc, image, finger_lengths, filt):
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = hand_proc.process(image)
@@ -190,10 +192,6 @@ def process_img(hand_proc, image, finger_lengths):
                 hand_landmarks = results.multi_hand_world_landmarks[index]  # metric
                 # hand_landmarks=results.multi_hand_landmarks[index] #normalized
                 hand_landmarks_norm = results.multi_hand_landmarks[index]  # normalized
-
-                # PINCH MANAGEMENT
-                pinch_detected = False
-                index_thumb_relative_pos = 0.0
 
                 tip1_x = (
                     hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x
@@ -302,14 +300,21 @@ def process_img(hand_proc, image, finger_lengths):
                     )
 
                     # Detect pinch if index finger and thumb are close
+                    # PINCH MANAGEMENT
+                    right_pinch_detected = False
+                    index_thumb_relative_pos = 0.0
                     if (
                         np.linalg.norm(
                             [
-                                thumb_tip_extended[0]
+                                hand_landmarks.landmark[
+                                    mp_hands.HandLandmark.THUMB_TIP
+                                ].x
                                 - hand_landmarks.landmark[
                                     mp_hands.HandLandmark.INDEX_FINGER_TIP
                                 ].x,
-                                thumb_tip_extended[1]
+                                hand_landmarks.landmark[
+                                    mp_hands.HandLandmark.THUMB_TIP
+                                ].y
                                 - hand_landmarks.landmark[
                                     mp_hands.HandLandmark.INDEX_FINGER_TIP
                                 ].y,
@@ -317,10 +322,12 @@ def process_img(hand_proc, image, finger_lengths):
                         )
                         < 0.02
                     ):
-                        pinch_detected = True
+                        # print("YEah")
+                        right_pinch_detected = True
                         index_thumb_relative_pos = (
                             thumb_tip_extended[0] - index_tip_extended[0]
                         )
+
                 ### END OF TEST
 
                 ### NO THUMB EXTENSION
@@ -508,15 +515,16 @@ def process_img(hand_proc, image, finger_lengths):
                 if tip1[2] <= 0.03:
                     tip1[1] = 0.0
 
-                if pinch_detected:
-                    tip4 = np.array([0.03, -0.03 - index_thumb_relative_pos, 0.1])
-                    tip1[2] = tip1_extended[2]
-
                 # scale=0.01
                 # image = cv2.drawFrameAxes(image, K, disto, rotV, origin, scale)
 
                 # res=[{'r_tip1': [tip1_x,tip1_y,tip1_z],'r_tip2': [tip2_x,tip2_y,tip2_z],'r_tip3': [tip3_x,tip3_y,tip3_z],'r_tip4': [tip4_x,tip4_y,tip4_z]}]
                 if handedness_classif.classification[0].label == "Right":
+
+                    if right_pinch_detected:
+                        tip4 = np.array([0.03, -0.03 - index_thumb_relative_pos, 0.1])
+                        tip1[2] = tip1_extended[2]
+
                     r_res = [
                         {
                             "r_tip1": tip1 * finger_lengths[0],
@@ -556,6 +564,10 @@ def process_img(hand_proc, image, finger_lengths):
                     #     f"DIstance: {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].z}, {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].z}, {hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].z}"
                     # )
                     # print(f"lengths: {finger_lengths}")
+                    sample = r_res[0]
+                    filtered = filt.update(sample)
+                    r_res = [filtered]
+
                 elif handedness_classif.classification[0].label == "Left":
                     l_res = [
                         {"l_tip1": tip1, "l_tip2": tip2, "l_tip3": tip3, "l_tip4": tip4}
@@ -596,7 +608,12 @@ def main():
 
                     frame = cv2.flip(frame, 1)
                     # process
-                    frame, r_res, l_res = process_img(hands, frame, finger_lengths)
+                    filt = OneEuroDictFilter(
+                        freq=100.0, min_cutoff=2.0, beta=0.02, d_cutoff=1.0
+                    )
+                    frame, r_res, l_res = process_img(
+                        hands, frame, finger_lengths, filt
+                    )
 
                     if r_res is not None:
                         node.send_output("r_hand_pos", pa.array(r_res))
