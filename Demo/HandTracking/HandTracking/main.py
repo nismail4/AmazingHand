@@ -540,19 +540,21 @@ def process_img(hand_proc, image, finger_lengths, res_filt, coord_system_filt):
                     ]
                 )
 
-                # Adjust index finger position when bent
                 if tip1[2] <= 0.03:
-                    tip1[1] = 0.0
-
+                    tip1[1] = 0
                 # scale=0.01
                 # image = cv2.drawFrameAxes(image, K, disto, rotV, origin, scale)
 
                 # res=[{'r_tip1': [tip1_x,tip1_y,tip1_z],'r_tip2': [tip2_x,tip2_y,tip2_z],'r_tip3': [tip3_x,tip3_y,tip3_z],'r_tip4': [tip4_x,tip4_y,tip4_z]}]
                 if handedness_classif.classification[0].label == "Right":
 
+                    # Adjust index finger position when bent
+
                     if right_pinch_detected:
-                        tip4 = np.array([0.03, -0.03 - index_thumb_relative_pos, 0.1])
+                        # tip4 = np.array([0.03, -0.03 - index_thumb_relative_pos, 0.1])
+                        tip4 = np.array([0.03, -0.02 - index_thumb_relative_pos, 0.1])
                         tip1[2] = tip1_extended[2]
+                        tip1[1] += index_thumb_relative_pos
 
                     r_res = [
                         {
@@ -643,13 +645,13 @@ def main():
 
                     coord_system_filt = {
                         "origin": OneEuro3D(
-                            freq=100.0, min_cutoff=0.4, beta=0.02, d_cutoff=1.0
+                            freq=100.0, min_cutoff=2.0, beta=0.04, d_cutoff=1.0
                         ),
                         "middle_finger_MCP": OneEuro3D(
-                            freq=100.0, min_cutoff=0.4, beta=0.02, d_cutoff=1.0
+                            freq=100.0, min_cutoff=2.0, beta=0.04, d_cutoff=1.0
                         ),
                         "index_finger_MCP": OneEuro3D(
-                            freq=100.0, min_cutoff=0.4, beta=0.02, d_cutoff=1.0
+                            freq=100.0, min_cutoff=2.0, beta=0.04, d_cutoff=1.0
                         ),
                     }
 
