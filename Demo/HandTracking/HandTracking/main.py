@@ -29,7 +29,7 @@ import json
 from pathlib import Path
 from typing import Any, Tuple
 
-from one_euro_filter import OneEuroDictFilter
+from one_euro_filter import OneEuroDictFilter, OneEuro3D
 
 CALIBRATION_KEYS = ("index_finger", "middle_finger", "ring_finger", "thumb")
 
@@ -157,7 +157,7 @@ def point_on_line_at_distance(
     return new_point
 
 
-def process_img(hand_proc, image, finger_lengths, filt):
+def process_img(hand_proc, image, finger_lengths, res_filt, coord_system_filt):
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = hand_proc.process(image)
@@ -233,6 +233,10 @@ def process_img(hand_proc, image, finger_lengths, filt):
                     - hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].z
                 )
 
+                # print(
+                #     f"{hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].z:.3f}, {hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z:.3f}"
+                # )
+
                 ### TEST THUMB EXTENSION HANDLING
                 thumb_tip_extended = point_on_line_at_distance(
                     np.array(
@@ -298,6 +302,30 @@ def process_img(hand_proc, image, finger_lengths, filt):
                         thumb_tip_extended[2]
                         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].z
                     )
+
+                    ### TEST Z THUMB MODIFICATION IF BENT
+                    if (
+                        np.linalg.norm(
+                            [
+                                hand_landmarks.landmark[
+                                    mp_hands.HandLandmark.THUMB_TIP
+                                ].x
+                                - hand_landmarks.landmark[
+                                    mp_hands.HandLandmark.RING_FINGER_MCP
+                                ].x,
+                                hand_landmarks.landmark[
+                                    mp_hands.HandLandmark.THUMB_TIP
+                                ].y
+                                - hand_landmarks.landmark[
+                                    mp_hands.HandLandmark.RING_FINGER_MCP
+                                ].y,
+                            ]
+                        )
+                        < 0.02
+                    ):
+                        tip4_z = hand_landmarks.landmark[
+                            mp_hands.HandLandmark.RING_FINGER_MCP
+                        ].z
 
                     # Detect pinch if index finger and thumb are close
                     # PINCH MANAGEMENT
@@ -416,6 +444,9 @@ def process_img(hand_proc, image, finger_lengths, filt):
                     ]
                 )  # wrist base as the origin
 
+                # Filter origin
+                origin = coord_system_filt["origin"].filter(origin)
+
                 mid_mcp = np.array(
                     [
                         hand_landmarks_norm.landmark[
@@ -429,17 +460,13 @@ def process_img(hand_proc, image, finger_lengths, filt):
                         ].z,
                     ]
                 )  # base of the middle finger
+
+                mid_mcp = coord_system_filt["middle_finger_MCP"].filter(mid_mcp)
+
                 unit_z = (
                     mid_mcp - origin
                 )  # z is unit vector from base of wrist toward base of middle finger
                 unit_z = unit_z / np.linalg.norm(unit_z)
-                pinky_mcp = np.array(
-                    [
-                        hand_landmarks_norm.landmark[mp_hands.HandLandmark.PINKY_MCP].x,
-                        hand_landmarks_norm.landmark[mp_hands.HandLandmark.PINKY_MCP].y,
-                        hand_landmarks_norm.landmark[mp_hands.HandLandmark.PINKY_MCP].z,
-                    ]
-                )  # base of the pinky finger
 
                 index_mcp = np.array(
                     [
@@ -454,6 +481,8 @@ def process_img(hand_proc, image, finger_lengths, filt):
                         ].z,
                     ]
                 )  # base of the index finger
+
+                index_mcp = coord_system_filt["index_finger_MCP"].filter(index_mcp)
 
                 # print(f"ORIGIN: {origin} MID: {mid_mcp}")
 
@@ -565,7 +594,7 @@ def process_img(hand_proc, image, finger_lengths, filt):
                     # )
                     # print(f"lengths: {finger_lengths}")
                     sample = r_res[0]
-                    filtered = filt.update(sample)
+                    filtered = res_filt.update(sample)
                     r_res = [filtered]
 
                 elif handedness_classif.classification[0].label == "Left":
@@ -608,11 +637,24 @@ def main():
 
                     frame = cv2.flip(frame, 1)
                     # process
-                    filt = OneEuroDictFilter(
+                    res_filt = OneEuroDictFilter(
                         freq=100.0, min_cutoff=2.0, beta=0.02, d_cutoff=1.0
                     )
+
+                    coord_system_filt = {
+                        "origin": OneEuro3D(
+                            freq=100.0, min_cutoff=0.4, beta=0.02, d_cutoff=1.0
+                        ),
+                        "middle_finger_MCP": OneEuro3D(
+                            freq=100.0, min_cutoff=0.4, beta=0.02, d_cutoff=1.0
+                        ),
+                        "index_finger_MCP": OneEuro3D(
+                            freq=100.0, min_cutoff=0.4, beta=0.02, d_cutoff=1.0
+                        ),
+                    }
+
                     frame, r_res, l_res = process_img(
-                        hands, frame, finger_lengths, filt
+                        hands, frame, finger_lengths, res_filt, coord_system_filt
                     )
 
                     if r_res is not None:

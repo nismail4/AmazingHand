@@ -22,15 +22,18 @@ class OneEuro1D:
             self.x_prev = x
             return x
 
-        # dérivée
+        # Derivative of the signal
         dx = (x - self.x_prev) * self.freq
+
+        # Filter the derivative
         a_d = self._alpha(self.d_cutoff)
         dx_hat = a_d * dx + (1.0 - a_d) * self.dx_prev
 
-        # cutoff adaptatif
+        # Adaptive cutoff
         cutoff = self.min_cutoff + self.beta * abs(dx_hat)
         a = self._alpha(cutoff)
 
+        # Filter the signal
         x_hat = a * x + (1.0 - a) * self.x_prev
 
         self.x_prev = x_hat
