@@ -235,98 +235,81 @@ def process_img(hand_proc, image, finger_lengths):
                     - hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].z
                 )
 
-                ### THUMB EXTENSION HANDLING
-                # thumb_tip_extended = point_on_line_at_distance(
-                #     np.array(
-                #         [
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x,
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y,
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z,
-                #         ]
-                #     ),
-                #     np.array(
-                #         [
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x,
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].y,
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].z,
-                #         ]
-                #     ),
-                #     distance=0,
-                # )
+                ### TEST THUMB EXTENSION HANDLING
+                thumb_tip_extended = point_on_line_at_distance(
+                    np.array(
+                        [
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].x,
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].y,
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].z,
+                        ]
+                    ),
+                    np.array(
+                        [
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x,
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y,
+                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z,
+                        ]
+                    ),
+                    distance=-0.02,
+                )
 
-                # if handedness_classif.classification[0].label == "Right":
-                #     tip4_x = (
-                #         thumb_tip_extended[0]
-                #         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x
-                #     )
-                #     tip4_y = (
-                #         thumb_tip_extended[1]
-                #         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y
-                #     )
-                #     # We modify z if x and y are close to INDEX_FINGER_MCP
-                #     if (
-                #         np.linalg.norm(
-                #             [
-                #                 thumb_tip_extended[0]
-                #                 - hand_landmarks.landmark[
-                #                     mp_hands.HandLandmark.INDEX_FINGER_TIP
-                #                 ].x,
-                #                 thumb_tip_extended[1]
-                #                 - hand_landmarks.landmark[
-                #                     mp_hands.HandLandmark.INDEX_FINGER_TIP
-                #                 ].y,
-                #             ]
-                #         )
-                #         < 0.01
-                #     ):
-                #         tip4_z = (
-                #             hand_landmarks.landmark[
-                #                 mp_hands.HandLandmark.INDEX_FINGER_TIP
-                #             ].z
-                #             - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].z
-                #         )
-                #     else:
-                #         tip4_z = (
-                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z
-                #             - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].z
-                #         )
-
-                ### NO THUMB EXTENSION
+                ### TEST INDEX EXTENSION HANDLING
+                index_tip_extended = point_on_line_at_distance(
+                    np.array(
+                        [
+                            hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_DIP
+                            ].x,
+                            hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_DIP
+                            ].y,
+                            hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_DIP
+                            ].z,
+                        ]
+                    ),
+                    np.array(
+                        [
+                            hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_TIP
+                            ].x,
+                            hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_TIP
+                            ].y,
+                            hand_landmarks.landmark[
+                                mp_hands.HandLandmark.INDEX_FINGER_TIP
+                            ].z,
+                        ]
+                    ),
+                    distance=-0.04,
+                )
 
                 if handedness_classif.classification[0].label == "Right":
                     tip4_x = (
-                        hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x
+                        thumb_tip_extended[0]
                         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x
                     )
+
                     tip4_y = (
-                        hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y
+                        thumb_tip_extended[1]
                         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y
                     )
-                    # # tip4_z = (
-                    # #     hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z
-                    # #     - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].z
-                    # # )
 
-                    # else:
                     tip4_z = (
-                        hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z
-                        - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].z
+                        thumb_tip_extended[2]
+                        - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].z
                     )
 
-                    ## TEST MODIFICATION
-                    # We modify z if x and y are close to INDEX_FINGER_MCP
+                    # Detect pinch if index finger and thumb are close
                     if (
                         np.linalg.norm(
                             [
-                                hand_landmarks.landmark[
-                                    mp_hands.HandLandmark.THUMB_TIP
-                                ].x
+                                thumb_tip_extended[0]
                                 - hand_landmarks.landmark[
                                     mp_hands.HandLandmark.INDEX_FINGER_TIP
                                 ].x,
-                                hand_landmarks.landmark[
-                                    mp_hands.HandLandmark.THUMB_TIP
-                                ].y
+                                thumb_tip_extended[1]
                                 - hand_landmarks.landmark[
                                     mp_hands.HandLandmark.INDEX_FINGER_TIP
                                 ].y,
@@ -336,15 +319,57 @@ def process_img(hand_proc, image, finger_lengths):
                     ):
                         pinch_detected = True
                         index_thumb_relative_pos = (
-                            hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x
-                            - hand_landmarks.landmark[
-                                mp_hands.HandLandmark.INDEX_FINGER_TIP
-                            ].x
+                            thumb_tip_extended[0] - index_tip_extended[0]
                         )
-                        # Fixed values to face index tip position
-                        # tip4_x = -0.01
-                        # tip4_y = -0.07
-                        # tip4_z = 0.0
+                ### END OF TEST
+
+                ### NO THUMB EXTENSION
+
+                # if handedness_classif.classification[0].label == "Right":
+                #     tip4_x = (
+                #         hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x
+                #         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].x
+                #     )
+
+                #     tip4_y = (
+                #         hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y
+                #         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].y
+                #     )
+
+                #     tip4_z = (
+                #         hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z
+                #         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC].z
+                #     )
+
+                #     # Detect pinch if index finger and thumb are close
+                #     if (
+                #         np.linalg.norm(
+                #             [
+                #                 hand_landmarks.landmark[
+                #                     mp_hands.HandLandmark.THUMB_TIP
+                #                 ].x
+                #                 - hand_landmarks.landmark[
+                #                     mp_hands.HandLandmark.INDEX_FINGER_TIP
+                #                 ].x,
+                #                 hand_landmarks.landmark[
+                #                     mp_hands.HandLandmark.THUMB_TIP
+                #                 ].y
+                #                 - hand_landmarks.landmark[
+                #                     mp_hands.HandLandmark.INDEX_FINGER_TIP
+                #                 ].y,
+                #             ]
+                #         )
+                #         < 0.02
+                #     ):
+                #         pinch_detected = True
+                #         index_thumb_relative_pos = (
+                #             hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x
+                #             - hand_landmarks.landmark[
+                #                 mp_hands.HandLandmark.INDEX_FINGER_TIP
+                #             ].x
+                #         )
+
+                ### END OF MODIFICATIONS
 
                 if handedness_classif.classification[0].label == "Left":
                     tip4_x = (
@@ -360,31 +385,6 @@ def process_img(hand_proc, image, finger_lengths):
                         - hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].z
                     )
 
-                # print(
-                #     f"tip1: ({hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x:.3f}, {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y:.3f}, {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].z:.3f}) /// tip4: ({hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].x:.3f}, {hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y:.3f}, {hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].z:.3f})"
-                # )
-
-                # tip1_x=hand_landmarks_norm.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x-hand_landmarks_norm.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].x
-                # tip1_y=hand_landmarks_norm.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y-hand_landmarks_norm.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y
-                # tip1_z=hand_landmarks_norm.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].z-hand_landmarks_norm.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].z
-
-                # tip2_x=hand_landmarks_norm.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].x-hand_landmarks_norm.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].x
-                # tip2_y=hand_landmarks_norm.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].y-hand_landmarks_norm.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y
-                # tip2_z=hand_landmarks_norm.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP].z-hand_landmarks_norm.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].z
-
-                # tip3_x=hand_landmarks_norm.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].x-hand_landmarks_norm.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].x
-                # tip3_y=hand_landmarks_norm.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].y-hand_landmarks_norm.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y
-                # tip3_z=hand_landmarks_norm.landmark[mp_hands.HandLandmark.RING_FINGER_TIP].z-hand_landmarks_norm.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].z
-
-                # tip4_x=hand_landmarks_norm.landmark[mp_hands.HandLandmark.THUMB_TIP].x-hand_landmarks_norm.landmark[mp_hands.HandLandmark.THUMB_MCP].x
-                # tip4_y=hand_landmarks_norm.landmark[mp_hands.HandLandmark.THUMB_TIP].y-hand_landmarks_norm.landmark[mp_hands.HandLandmark.THUMB_MCP].y
-                # tip4_z=hand_landmarks_norm.landmark[mp_hands.HandLandmark.THUMB_TIP].z-hand_landmarks_norm.landmark[mp_hands.HandLandmark.THUMB_MCP].z
-
-                # tip1_x=hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x
-                # tip1_y=hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y
-                # tip1_z=hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].z
-
-                # print(f'TIP: {tip_x} {tip_y} {tip_z} ({hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x} {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y} {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].z})')
                 mp_drawing.draw_landmarks(
                     image,
                     hand_landmarks_norm,
@@ -487,14 +487,30 @@ def process_img(hand_proc, image, finger_lengths):
                 tip3 = R @ np.array([tip3_x, tip3_y, tip3_z])
                 tip4 = R @ np.array([tip4_x, tip4_y, tip4_z])
 
+                tip1_extended = R @ np.array(
+                    [
+                        index_tip_extended[0]
+                        - hand_landmarks.landmark[
+                            mp_hands.HandLandmark.INDEX_FINGER_MCP
+                        ].x,
+                        index_tip_extended[1]
+                        - hand_landmarks.landmark[
+                            mp_hands.HandLandmark.INDEX_FINGER_MCP
+                        ].y,
+                        index_tip_extended[2]
+                        - hand_landmarks.landmark[
+                            mp_hands.HandLandmark.INDEX_FINGER_MCP
+                        ].z,
+                    ]
+                )
+
+                # Adjust index finger position when bent
+                if tip1[2] <= 0.03:
+                    tip1[1] = 0.0
+
                 if pinch_detected:
                     tip4 = np.array([0.03, -0.03 - index_thumb_relative_pos, 0.1])
-
-                # Adaptation for bent fingers below MCP level
-                if tip1[2] <= 0.02:
-                    tip1[1] = 0.0
-                if pinch_detected:
-                    tip1[2] = tip1[2] - 0.015
+                    tip1[2] = tip1_extended[2]
 
                 # scale=0.01
                 # image = cv2.drawFrameAxes(image, K, disto, rotV, origin, scale)
@@ -513,28 +529,28 @@ def process_img(hand_proc, image, finger_lengths):
                     #     f"RIGHT: {tip1_x:.3f} {tip1_y:.3f} {tip1_z:.3f} => {tip1}. {unit_x} {unit_y} {unit_z}"
                     # )
 
-                    draw_two_lines_red(
-                        image,
-                        [
-                            hand_landmarks_norm.landmark[
-                                mp_hands.HandLandmark.THUMB_MCP
-                            ].x,
-                            hand_landmarks_norm.landmark[
-                                mp_hands.HandLandmark.THUMB_MCP
-                            ].y,
-                        ],
-                        unit_z,
-                        [
-                            hand_landmarks_norm.landmark[
-                                mp_hands.HandLandmark.THUMB_MCP
-                            ].x,
-                            hand_landmarks_norm.landmark[
-                                mp_hands.HandLandmark.THUMB_MCP
-                            ].y,
-                        ],
-                        unit_y,
-                        thickness=2,
-                    )
+                    # draw_two_lines_red(
+                    #     image,
+                    #     [
+                    #         hand_landmarks_norm.landmark[
+                    #             mp_hands.HandLandmark.THUMB_MCP
+                    #         ].x,
+                    #         hand_landmarks_norm.landmark[
+                    #             mp_hands.HandLandmark.THUMB_MCP
+                    #         ].y,
+                    #     ],
+                    #     unit_z,
+                    #     [
+                    #         hand_landmarks_norm.landmark[
+                    #             mp_hands.HandLandmark.THUMB_MCP
+                    #         ].x,
+                    #         hand_landmarks_norm.landmark[
+                    #             mp_hands.HandLandmark.THUMB_MCP
+                    #         ].y,
+                    #     ],
+                    #     unit_y,
+                    #     thickness=2,
+                    # )
 
                     # print(
                     #     f"DIstance: {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].z}, {hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].z}, {hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].z}"
