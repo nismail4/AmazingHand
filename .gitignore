@@ -1,0 +1,5 @@
+Demo/_work
+Demo/target
+*.egg-info/
+Demo/out
+__pycache__/
