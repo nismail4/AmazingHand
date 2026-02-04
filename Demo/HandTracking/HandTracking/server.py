@@ -52,7 +52,6 @@ class AmazingHandServicer:
     ) -> Empty:
         """Stop the current episode recording."""
 
-        # if request.right_hand.index_pinch.pinch_value < 0.9:
         r_res = [
             {
                 "r_tip1": [
@@ -78,8 +77,6 @@ class AmazingHandServicer:
             }
         ]
 
-        # if request.right_hand.index_pinch.pinch_value > 0.9:
-
         def modulation(max_mod: float, value: float) -> float:
             return max_mod * value
 
@@ -93,56 +90,40 @@ class AmazingHandServicer:
             -0.02, request.right_hand.index_pinch.pinch_value
         )
 
-        # else:
-        #     r_res = [
-        #         {
-        #             "r_tip1": [
-        #                 request.right_hand.index.x * 0.9,
-        #                 request.right_hand.index.y * 0.9,
-        #                 request.right_hand.index.z * 0.9,
-        #             ],
-        #             "r_tip2": [
-        #                 request.right_hand.middle.x * 0.9,
-        #                 request.right_hand.middle.y * 0.9,
-        #                 request.right_hand.middle.z * 0.9,
-        #             ],
-        #             "r_tip3": [
-        #                 request.right_hand.ring.x * 0.9,
-        #                 request.right_hand.ring.y * 0.9,
-        #                 request.right_hand.ring.z * 0.9,
-        #             ],
-        #             "r_tip4": [
-        #                 0.03,
-        #                 -0.02,
-        #                 0.1,
-        #             ],
-        #         }
-        #     ]
-
         l_res = [
             {
                 "l_tip1": [
-                    request.left_hand.index.x,
-                    request.left_hand.index.y,
-                    request.left_hand.index.z,
+                    request.left_hand.index.x * 0.87,
+                    request.left_hand.index.y * 0.87,
+                    request.left_hand.index.z * 0.87,
                 ],
                 "l_tip2": [
-                    request.left_hand.middle.x,
-                    request.left_hand.middle.y,
-                    request.left_hand.middle.z,
+                    request.left_hand.middle.x * 0.75,
+                    request.left_hand.middle.y * 0.75,
+                    request.left_hand.middle.z * 0.75,
                 ],
                 "l_tip3": [
-                    request.left_hand.ring.x,
-                    request.left_hand.ring.y,
-                    request.left_hand.ring.z,
+                    request.left_hand.ring.x * 0.77,
+                    request.left_hand.ring.y * 0.77,
+                    request.left_hand.ring.z * 0.77,
                 ],
                 "l_tip4": [
-                    request.left_hand.thumb.x,
-                    request.left_hand.thumb.y,
-                    request.left_hand.thumb.z,
+                    request.left_hand.thumb.x * 0.75,
+                    request.left_hand.thumb.y * 0.75,
+                    request.left_hand.thumb.z * 0.75,
                 ],
             }
         ]
+
+        l_res[0]["l_tip1"][2] = l_res[0]["l_tip1"][2] + modulation(
+            -0.03, request.left_hand.index_pinch.pinch_value
+        )
+        l_res[0]["l_tip4"][2] = l_res[0]["l_tip4"][2] + modulation(
+            0.03, request.left_hand.index_pinch.pinch_value
+        )
+        l_res[0]["l_tip4"][0] = l_res[0]["l_tip4"][0] + modulation(
+            -0.02, request.left_hand.index_pinch.pinch_value
+        )
 
         if r_res is not None:
             self.node.send_output("r_hand_pos", pa.array(r_res))
