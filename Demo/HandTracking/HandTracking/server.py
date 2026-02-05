@@ -52,27 +52,52 @@ class AmazingHandServicer:
     ) -> Empty:
         """Stop the current episode recording."""
 
+        # r_res = [
+        #     {
+        #         "r_tip1": [
+        #             request.right_hand.index.x * 0.87,
+        #             request.right_hand.index.y * 0.87,
+        #             request.right_hand.index.z * 0.87,
+        #         ],
+        #         "r_tip2": [
+        #             request.right_hand.middle.x * 0.75,
+        #             request.right_hand.middle.y * 0.75,
+        #             request.right_hand.middle.z * 0.75,
+        #         ],
+        #         "r_tip3": [
+        #             request.right_hand.ring.x * 0.77,
+        #             request.right_hand.ring.y * 0.77,
+        #             request.right_hand.ring.z * 0.77,
+        #         ],
+        #         "r_tip4": [
+        #             request.right_hand.thumb.x * 0.75,
+        #             request.right_hand.thumb.y * 0.75,
+        #             request.right_hand.thumb.z * 0.75,
+        #         ],
+        #     }
+        # ]
+
         r_res = [
             {
                 "r_tip1": [
-                    request.right_hand.index.x * 0.87,
-                    request.right_hand.index.y * 0.87,
-                    request.right_hand.index.z * 0.87,
+                    request.right_hand.index.x,
+                    request.right_hand.index.y,
+                    request.right_hand.index.z,
                 ],
                 "r_tip2": [
-                    request.right_hand.middle.x * 0.75,
-                    request.right_hand.middle.y * 0.75,
-                    request.right_hand.middle.z * 0.75,
+                    request.right_hand.middle.x,
+                    request.right_hand.middle.y,
+                    request.right_hand.middle.z,
                 ],
                 "r_tip3": [
-                    request.right_hand.ring.x * 0.77,
-                    request.right_hand.ring.y * 0.77,
-                    request.right_hand.ring.z * 0.77,
+                    request.right_hand.ring.x,
+                    request.right_hand.ring.y,
+                    request.right_hand.ring.z,
                 ],
                 "r_tip4": [
-                    request.right_hand.thumb.x * 0.75,
-                    request.right_hand.thumb.y * 0.75,
-                    request.right_hand.thumb.z * 0.75,
+                    request.right_hand.thumb.x,
+                    request.right_hand.thumb.y,
+                    request.right_hand.thumb.z,
                 ],
             }
         ]
@@ -80,53 +105,79 @@ class AmazingHandServicer:
         def modulation(max_mod: float, value: float) -> float:
             return max_mod * value
 
-        r_res[0]["r_tip1"][2] = r_res[0]["r_tip1"][2] + modulation(
-            -0.03, request.right_hand.index_pinch.pinch_value
-        )
-        r_res[0]["r_tip4"][2] = r_res[0]["r_tip4"][2] + modulation(
-            0.03, request.right_hand.index_pinch.pinch_value
-        )
-        r_res[0]["r_tip4"][0] = r_res[0]["r_tip4"][0] + modulation(
-            -0.02, request.right_hand.index_pinch.pinch_value
-        )
+        # r_res[0]["r_tip1"][2] = r_res[0]["r_tip1"][2] + modulation(
+        #     -0.03, request.right_hand.index_pinch.pinch_value
+        # )
+        # r_res[0]["r_tip4"][2] = r_res[0]["r_tip4"][2] + modulation(
+        #     0.03, request.right_hand.index_pinch.pinch_value
+        # )
+        # r_res[0]["r_tip4"][0] = r_res[0]["r_tip4"][0] + modulation(
+        #     -0.02, request.right_hand.index_pinch.pinch_value
+        # )
+
+        # l_res = [
+        #     {
+        #         "l_tip1": [
+        #             request.left_hand.index.x * 0.87,
+        #             request.left_hand.index.y * 0.87,
+        #             request.left_hand.index.z * 0.87,
+        #         ],
+        #         "l_tip2": [
+        #             request.left_hand.middle.x * 0.75,
+        #             request.left_hand.middle.y * 0.75,
+        #             request.left_hand.middle.z * 0.75,
+        #         ],
+        #         "l_tip3": [
+        #             request.left_hand.ring.x * 0.77,
+        #             request.left_hand.ring.y * 0.77,
+        #             request.left_hand.ring.z * 0.77,
+        #         ],
+        #         "l_tip4": [
+        #             request.left_hand.thumb.x * 0.75,
+        #             request.left_hand.thumb.y * 0.75,
+        #             request.left_hand.thumb.z * 0.75,
+        #         ],
+        #     }
+        # ]
 
         l_res = [
             {
                 "l_tip1": [
-                    request.left_hand.index.x * 0.87,
-                    request.left_hand.index.y * 0.87,
-                    request.left_hand.index.z * 0.87,
+                    request.left_hand.index.x,
+                    request.left_hand.index.y,
+                    request.left_hand.index.z,
                 ],
                 "l_tip2": [
-                    request.left_hand.middle.x * 0.75,
-                    request.left_hand.middle.y * 0.75,
-                    request.left_hand.middle.z * 0.75,
+                    request.left_hand.middle.x,
+                    request.left_hand.middle.y,
+                    request.left_hand.middle.z,
                 ],
                 "l_tip3": [
-                    request.left_hand.ring.x * 0.77,
-                    request.left_hand.ring.y * 0.77,
-                    request.left_hand.ring.z * 0.77,
+                    request.left_hand.ring.x,
+                    request.left_hand.ring.y,
+                    request.left_hand.ring.z,
                 ],
                 "l_tip4": [
-                    request.left_hand.thumb.x * 0.75,
-                    request.left_hand.thumb.y * 0.75,
-                    request.left_hand.thumb.z * 0.75,
+                    request.left_hand.thumb.x,
+                    request.left_hand.thumb.y,
+                    request.left_hand.thumb.z,
                 ],
             }
         ]
 
-        l_res[0]["l_tip1"][2] = l_res[0]["l_tip1"][2] + modulation(
-            -0.03, request.left_hand.index_pinch.pinch_value
-        )
-        l_res[0]["l_tip4"][2] = l_res[0]["l_tip4"][2] + modulation(
-            0.03, request.left_hand.index_pinch.pinch_value
-        )
-        l_res[0]["l_tip4"][0] = l_res[0]["l_tip4"][0] + modulation(
-            -0.02, request.left_hand.index_pinch.pinch_value
-        )
+        # l_res[0]["l_tip1"][2] = l_res[0]["l_tip1"][2] + modulation(
+        #     -0.03, request.left_hand.index_pinch.pinch_value
+        # )
+        # l_res[0]["l_tip4"][2] = l_res[0]["l_tip4"][2] + modulation(
+        #     0.03, request.left_hand.index_pinch.pinch_value
+        # )
+        # l_res[0]["l_tip4"][0] = l_res[0]["l_tip4"][0] + modulation(
+        #     -0.02, request.left_hand.index_pinch.pinch_value
+        # )
 
         if r_res is not None:
             self.node.send_output("r_hand_pos", pa.array(r_res))
+            print("Sent right hand position:", r_res)
         if l_res is not None:
             self.node.send_output("l_hand_pos", pa.array(l_res))
         return Empty()
@@ -139,7 +190,7 @@ def main() -> None:
 
     amazing_hand_servicer = AmazingHandServicer()
     amazing_hand_servicer._register_to_server(server)
-    server.add_insecure_port("[::]:50074")
+    server.add_insecure_port("[::]:50083")
     server.start()
     server.wait_for_termination()
 

@@ -22,23 +22,21 @@ ROOT_PATH = Path(os.path.dirname(os.path.abspath(__file__))).parent
 class Client:
     """TODO: Add docstring."""
 
-    def __init__(self, mode='pos'):
+    def __init__(self, mode="pos"):
         """TODO: Add docstring."""
-
 
         self.model = mujoco.MjModel.from_xml_path(
             f"{ROOT_PATH}/AHSimulation/AH_Left/mjcf/scene.xml"
         )
         # self.data=mujoco.MjData(self.model)
 
-
         self.configuration = mink.Configuration(self.model)
 
         self.posture_task = mink.PostureTask(self.model, cost=1e-2)
 
-        if mode=='pos':
+        if mode == "pos":
             self.task1 = mink.FrameTask(
-                frame_name='tip1',
+                frame_name="tip1",
                 frame_type="site",
                 position_cost=1.0,
                 orientation_cost=0.0,
@@ -46,7 +44,7 @@ class Client:
             )
 
             self.task2 = mink.FrameTask(
-                frame_name='tip2',
+                frame_name="tip2",
                 frame_type="site",
                 position_cost=1.0,
                 orientation_cost=0.0,
@@ -54,7 +52,7 @@ class Client:
             )
 
             self.task3 = mink.FrameTask(
-                frame_name='tip3',
+                frame_name="tip3",
                 frame_type="site",
                 position_cost=1.0,
                 orientation_cost=0.0,
@@ -62,15 +60,15 @@ class Client:
             )
 
             self.task4 = mink.FrameTask(
-                frame_name='tip4',
+                frame_name="tip4",
                 frame_type="site",
                 position_cost=1.0,
                 orientation_cost=0.0,
                 lm_damping=1.0,
             )
-        elif mode=='quat': #we control the orientation
+        elif mode == "quat":  # we control the orientation
             self.task1 = mink.FrameTask(
-                frame_name='tip1',
+                frame_name="tip1",
                 frame_type="site",
                 position_cost=0.0,
                 orientation_cost=1.0,
@@ -78,7 +76,7 @@ class Client:
             )
 
             self.task2 = mink.FrameTask(
-                frame_name='tip2',
+                frame_name="tip2",
                 frame_type="site",
                 position_cost=0.0,
                 orientation_cost=1.0,
@@ -86,7 +84,7 @@ class Client:
             )
 
             self.task3 = mink.FrameTask(
-                frame_name='tip3',
+                frame_name="tip3",
                 frame_type="site",
                 position_cost=0.0,
                 orientation_cost=1.0,
@@ -94,7 +92,7 @@ class Client:
             )
 
             self.task4 = mink.FrameTask(
-                frame_name='tip4',
+                frame_name="tip4",
                 frame_type="site",
                 position_cost=0.0,
                 orientation_cost=1.0,
@@ -115,14 +113,12 @@ class Client:
             self.task4,
         ]
 
-
-
         self.model = self.configuration.model
         self.data = self.configuration.data
         self.solver = "quadprog"
 
-        self.motor_pos=[]
-        self.metadata=[]
+        self.motor_pos = []
+        self.metadata = []
         self.node = Node()
 
     def run(self):
@@ -137,11 +133,18 @@ class Client:
             # Initialize mocap bodies at their respective sites.
             self.posture_task.set_target_from_configuration(self.configuration)
 
-            mink.move_mocap_to_frame(self.model, self.data, "finger1_target", "tip1", "site")
-            mink.move_mocap_to_frame(self.model, self.data, "finger2_target", "tip2", "site")
-            mink.move_mocap_to_frame(self.model, self.data, "finger3_target", "tip3", "site")
-            mink.move_mocap_to_frame(self.model, self.data, "finger4_target", "tip4", "site")
-
+            mink.move_mocap_to_frame(
+                self.model, self.data, "finger1_target", "tip1", "site"
+            )
+            mink.move_mocap_to_frame(
+                self.model, self.data, "finger2_target", "tip2", "site"
+            )
+            mink.move_mocap_to_frame(
+                self.model, self.data, "finger3_target", "tip3", "site"
+            )
+            mink.move_mocap_to_frame(
+                self.model, self.data, "finger4_target", "tip4", "site"
+            )
 
             for event in self.node:
                 event_type = event["type"]
@@ -157,63 +160,97 @@ class Client:
 
                         step_start = time.time()
 
-
-
                         self.task1.set_target(
-                            mink.SE3.from_mocap_name(self.model, self.data, "finger1_target")
+                            mink.SE3.from_mocap_name(
+                                self.model, self.data, "finger1_target"
+                            )
                         )
                         self.task2.set_target(
-                            mink.SE3.from_mocap_name(self.model, self.data, "finger2_target")
+                            mink.SE3.from_mocap_name(
+                                self.model, self.data, "finger2_target"
+                            )
                         )
                         self.task3.set_target(
-                            mink.SE3.from_mocap_name(self.model, self.data, "finger3_target")
+                            mink.SE3.from_mocap_name(
+                                self.model, self.data, "finger3_target"
+                            )
                         )
                         self.task4.set_target(
-                            mink.SE3.from_mocap_name(self.model, self.data, "finger4_target")
+                            mink.SE3.from_mocap_name(
+                                self.model, self.data, "finger4_target"
+                            )
                         )
-
-
-
-
 
                         # vel = mink.solve_ik(self.configuration, self.tasks, self.model.opt.timestep, self.solver, 1e-5)
                         # self.configuration.integrate_inplace(vel, self.model.opt.timestep)
-                        vel = mink.solve_ik(self.configuration, self.tasks, rate.dt, self.solver, 1e-5)
+                        vel = mink.solve_ik(
+                            self.configuration, self.tasks, rate.dt, self.solver, 1e-5
+                        )
                         self.configuration.integrate_inplace(vel, rate.dt)
-
-
 
                         # Step the simulation forward
                         # mujoco.mj_step(self.m, self.data)
 
                         # mujoco.mj_step(self.model, self.data)
 
+                        # get the motors position and send
 
-                        #get the motors position and send
-
-
-                        f1_motor1=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger1_motor1")
-                        f1_motor2=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger1_motor2")
-                        f2_motor1=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger2_motor1")
-                        f2_motor2=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger2_motor2")
-                        f3_motor1=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger3_motor1")
-                        f3_motor2=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger3_motor2")
-                        f4_motor1=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger4_motor1")
-                        f4_motor2=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger4_motor2")
+                        f1_motor1 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger1_motor1"
+                        )
+                        f1_motor2 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger1_motor2"
+                        )
+                        f2_motor1 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger2_motor1"
+                        )
+                        f2_motor2 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger2_motor2"
+                        )
+                        f3_motor1 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger3_motor1"
+                        )
+                        f3_motor2 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger3_motor2"
+                        )
+                        f4_motor1 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger4_motor1"
+                        )
+                        f4_motor2 = mujoco.mj_name2id(
+                            self.model, mujoco.mjtObj.mjOBJ_JOINT, "finger4_motor2"
+                        )
                         # print(f"motor1: {self.data.joint(f1_motor1).qpos} motor2: {self.data.joint(f1_motor2).qpos}")
-                        self.metadata=event["metadata"]
-                        self.metadata["l_finger1"]=[0,1]
-                        self.metadata["l_finger2"]=[2,3]
-                        self.metadata["l_finger3"]=[4,5]
-                        self.metadata["l_finger4"]=[6,7]
+                        self.metadata = event["metadata"]
+                        self.metadata["l_finger1"] = [0, 1]
+                        self.metadata["l_finger2"] = [2, 3]
+                        self.metadata["l_finger3"] = [4, 5]
+                        self.metadata["l_finger4"] = [6, 7]
 
-                        self.motor_pos=np.zeros(8);
-                        self.motor_pos[self.metadata["l_finger1"]]=np.array([self.data.joint(f1_motor1).qpos[0],self.data.joint(f1_motor2).qpos[0]])
-                        self.motor_pos[self.metadata["l_finger2"]]=np.array([self.data.joint(f2_motor1).qpos[0],self.data.joint(f2_motor2).qpos[0]])
-                        self.motor_pos[self.metadata["l_finger3"]]=np.array([self.data.joint(f3_motor1).qpos[0],self.data.joint(f3_motor2).qpos[0]])
-                        self.motor_pos[self.metadata["l_finger4"]]=np.array([self.data.joint(f4_motor1).qpos[0],self.data.joint(f4_motor2).qpos[0]])
-
-
+                        self.motor_pos = np.zeros(8)
+                        self.motor_pos[self.metadata["l_finger1"]] = np.array(
+                            [
+                                self.data.joint(f1_motor1).qpos[0],
+                                self.data.joint(f1_motor2).qpos[0],
+                            ]
+                        )
+                        self.motor_pos[self.metadata["l_finger2"]] = np.array(
+                            [
+                                self.data.joint(f2_motor1).qpos[0],
+                                self.data.joint(f2_motor2).qpos[0],
+                            ]
+                        )
+                        self.motor_pos[self.metadata["l_finger3"]] = np.array(
+                            [
+                                self.data.joint(f3_motor1).qpos[0],
+                                self.data.joint(f3_motor2).qpos[0],
+                            ]
+                        )
+                        self.motor_pos[self.metadata["l_finger4"]] = np.array(
+                            [
+                                self.data.joint(f4_motor1).qpos[0],
+                                self.data.joint(f4_motor2).qpos[0],
+                            ]
+                        )
 
                         viewer.sync()
 
@@ -227,10 +264,13 @@ class Client:
                     elif event_id == "pull_position":
                         self.pull_position(self.node, event["metadata"])
 
-
                     elif event_id == "tick_ctrl":
-                        if len(self.metadata)>0:
-                            self.node.send_output("mj_l_joints_pos", pa.array(self.motor_pos), self.metadata)
+                        if len(self.metadata) > 0:
+                            self.node.send_output(
+                                "mj_l_joints_pos",
+                                pa.array(self.motor_pos),
+                                self.metadata,
+                            )
                         # self.pull_position(self.node, event["metadata"])
 
                     elif event_id == "pull_velocity":
@@ -273,47 +313,72 @@ class Client:
 
     def write_mocap_pos(self, hand):
 
-        #please, a method to access the mocap objects by name...
+        # please, a method to access the mocap objects by name...
 
         if "l_tip1" in hand[0]:
-            [x,y,z]=hand[0]['l_tip1'].values
-            self.data.mocap_pos[0]=[x.as_py()*1.5+0.025,y.as_py()*1.5-0.022,z.as_py()*1.5+0.098]
+            [x, y, z] = hand[0]["l_tip1"].values
+            self.data.mocap_pos[0] = [
+                # x.as_py() - 0.01,
+                # y.as_py() - 0.01,
+                # z.as_py(),
+                0.045,
+                -0.02,
+                0.08,
+            ]
         if "l_tip2" in hand[0]:
-            [x,y,z]=hand[0]['l_tip2'].values
-            self.data.mocap_pos[1]=[x.as_py()*1.5+0.025,y.as_py()*1.5+0.009,z.as_py()*1.5+0.092]
+            [x, y, z] = hand[0]["l_tip2"].values
+            self.data.mocap_pos[1] = [
+                x.as_py() - 0.01,
+                y.as_py() + 0.005,
+                z.as_py(),
+            ]
         if "l_tip3" in hand[0]:
-            [x,y,z]=hand[0]['l_tip3'].values
-            self.data.mocap_pos[2]=[x.as_py()*1.5+0.025,y.as_py()*1.5+0.040,z.as_py()*1.5+0.082]
+            [x, y, z] = hand[0]["l_tip3"].values
+            self.data.mocap_pos[2] = [
+                x.as_py() - 0.01,
+                y.as_py() + 0.02,
+                z.as_py(),
+            ]
         if "l_tip4" in hand[0]:
-            [x,y,z]=hand[0]['l_tip4'].values
-            self.data.mocap_pos[3]=[x.as_py()*1.5+0.024,y.as_py()*1.5-0.019,z.as_py()*1.5+0.017]
-
+            [x, y, z] = hand[0]["l_tip4"].values
+            self.data.mocap_pos[3] = [
+                # x.as_py(),
+                # y.as_py(),
+                # z.as_py(),
+                0.045,
+                -0.02,
+                0.09,
+            ]
 
     def write_mocap_quat(self, hand):
-        #please, a method to access the mocap objects by name...
+        # please, a method to access the mocap objects by name...
 
         if "l_tip1" in hand[0]:
-            [w,x,y,z]=hand[0]['l_tip1'].values
-            self.data.mocap_quat[0]=[w.as_py(),x.as_py(),y.as_py(),z.as_py()]
+            [w, x, y, z] = hand[0]["l_tip1"].values
+            self.data.mocap_quat[0] = [w.as_py(), x.as_py(), y.as_py(), z.as_py()]
         if "l_tip2" in hand[0]:
-            [w,x,y,z]=hand[0]['l_tip2'].values
-            self.data.mocap_quat[1]=[w.as_py(),x.as_py(),y.as_py(),z.as_py()]
+            [w, x, y, z] = hand[0]["l_tip2"].values
+            self.data.mocap_quat[1] = [w.as_py(), x.as_py(), y.as_py(), z.as_py()]
         if "l_tip3" in hand[0]:
-            [w,x,y,z]=hand[0]['l_tip3'].values
-            self.data.mocap_quat[2]=[w.as_py(),x.as_py(),y.as_py(),z.as_py()]
+            [w, x, y, z] = hand[0]["l_tip3"].values
+            self.data.mocap_quat[2] = [w.as_py(), x.as_py(), y.as_py(), z.as_py()]
         if "l_tip4" in hand[0]:
-            [w,x,y,z]=hand[0]['l_tip4'].values
-            self.data.mocap_quat[3]=[w.as_py(),x.as_py(),y.as_py(),z.as_py()]
-
-
+            [w, x, y, z] = hand[0]["l_tip4"].values
+            self.data.mocap_quat[3] = [w.as_py(), x.as_py(), y.as_py(), z.as_py()]
 
 
 def main():
     """Handle dynamic nodes, ask for the name of the node in the dataflow."""
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-m", "--mode", type=str, choices=['pos','quat'], default='pos',
-                    help="control mode: pos=position (we control the position of the tip) quat=quaternion (we control the orientation of the tip)")
+    parser.add_argument(
+        "-m",
+        "--mode",
+        type=str,
+        choices=["pos", "quat"],
+        default="pos",
+        help="control mode: pos=position (we control the position of the tip) quat=quaternion (we control the orientation of the tip)",
+    )
     args = parser.parse_args()
     client = Client(args.mode)
     client.run()
