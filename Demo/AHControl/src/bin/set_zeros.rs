@@ -1,7 +1,6 @@
 use clap::Parser;
 
-use eyre::{eyre, Result};
-use rustypot::servo;
+use AHControl::MotorController;
 use std::{error::Error, time::Duration};
 
 use facet::Facet;
@@ -68,13 +67,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_millis(10))
         .open()?;
 
-    let mut controller = servo::feetech::scs0009::Scs0009Controller::new()
-        .with_protocol_v1()
-        .with_serial_port(serial_port);
-
-    if motors_conf.motors[0].motor1.model != *"SCS0009" {
-        return Err(eyre!("Only SCS0009 motors are supported for now...").into());
-    };
+    let model = &motors_conf.motors[0].motor1.model;
+    let mut controller = MotorController::new(model, serial_port)?;
 
     // let output = DataId::from("pull_position".to_owned());
     let mut finger_names: Vec<String> = vec![];

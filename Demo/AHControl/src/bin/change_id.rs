@@ -1,7 +1,6 @@
 use clap::Parser;
 
-use rustypot::servo;
-// use rustypot::DynamixelProtocolHandler;
+use AHControl::MotorController;
 use std::{error::Error, thread, time::Duration};
 
 #[derive(Parser, Debug)]
@@ -19,6 +18,9 @@ struct Args {
     /// new id
     #[arg(short, long)]
     new_id: u8,
+    /// Motor model (SCS0009 or STS3032)
+    #[arg(short, long, default_value = "SCS0009")]
+    model: String,
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -27,6 +29,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let baudrate: u32 = args.baudrate;
     let old_id: u8 = args.old_id;
     let new_id: u8 = args.new_id;
+    let model: String = args.model;
 
     println!("Opening port {serialport} at baudrate {baudrate}");
     println!("Changing id: {old_id} into {new_id}");
@@ -35,10 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .timeout(Duration::from_millis(10))
         .open()?;
 
-    // let dph=DynamixelProtocolHandler::v1();
-    let mut controller = servo::feetech::scs0009::Scs0009Controller::new()
-        .with_protocol_v1()
-        .with_serial_port(serial_port);
+    let mut controller = MotorController::new(&model, serial_port)?;
 
     controller.write_id(old_id, new_id)?;
     thread::sleep(Duration::from_millis(1000));
