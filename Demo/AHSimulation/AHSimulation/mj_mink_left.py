@@ -318,12 +318,12 @@ class Client:
         if "l_tip1" in hand[0]:
             [x, y, z] = hand[0]["l_tip1"].values
             self.data.mocap_pos[0] = [
-                # x.as_py() - 0.01,
-                # y.as_py() - 0.01,
-                # z.as_py(),
-                0.045,
-                -0.02,
-                0.08,
+                x.as_py() - 0.01,
+                y.as_py() - 0.01,
+                z.as_py(),
+                # 0.045,
+                # -0.02,
+                # 0.08,
             ]
         if "l_tip2" in hand[0]:
             [x, y, z] = hand[0]["l_tip2"].values
@@ -342,12 +342,12 @@ class Client:
         if "l_tip4" in hand[0]:
             [x, y, z] = hand[0]["l_tip4"].values
             self.data.mocap_pos[3] = [
-                # x.as_py(),
-                # y.as_py(),
-                # z.as_py(),
-                0.045,
-                -0.02,
-                0.09,
+                x.as_py(),
+                y.as_py(),
+                z.as_py(),
+                # 0.045,
+                # -0.02,
+                # 0.09,
             ]
 
     def write_mocap_quat(self, hand):

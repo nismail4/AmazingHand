@@ -3,7 +3,7 @@ nodes:
     _unstable_deploy:
       machine: laptop
     build: pip install -e HandTracking
-    path: /home/demo/dev/AmazingHand/Demo/HandTracking/HandTracking/main.py #TODO absolute path
+    path: /home/demo/dev/AmazingHand/Demo/HandTracking/HandTracking/server.py #TODO absolute path
     env:
       CURRENT_CALIBRATION_FILE: /home/demo/dev/AmazingHand/Demo/HandTracking/HandTracking/current_calibration.json
     inputs:
@@ -36,12 +36,12 @@ nodes:
     outputs:
       - mj_l_joints_pos
 
-  # - id: hand_controller
-  #   _unstable_deploy:
-  #     machine: robot
-  #   build: cargo build -p AHControl
-  #   path: /home/reachy/dev/AmazingHand/Demo/target/debug/AHControl #TODO absolute path
-  #   args: --serialport /dev/grippers --config /home/reachy/dev/AmazingHand/Demo/AHControl/config/2hands.toml #TODO correct tty
-  #   inputs:
-  #     mj_r_joints_pos: r_hand_simulation/mj_r_joints_pos
-  #     mj_l_joints_pos: l_hand_simulation/mj_l_joints_pos
+  - id: hand_controller
+    _unstable_deploy:
+      machine: robot
+    build: cargo build -p AHControl
+    path: /home/reachy/dev/AmazingHand/Demo/target/debug/AHControl #TODO absolute path
+    args: --serialport /dev/grippers --config /home/reachy/dev/AmazingHand/Demo/AHControl/config/2hands.toml #TODO correct tty
+    inputs:
+      mj_r_joints_pos: r_hand_simulation/mj_r_joints_pos
+      mj_l_joints_pos: l_hand_simulation/mj_l_joints_pos

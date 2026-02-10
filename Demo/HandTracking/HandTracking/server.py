@@ -190,7 +190,7 @@ def main() -> None:
 
     amazing_hand_servicer = AmazingHandServicer()
     amazing_hand_servicer._register_to_server(server)
-    server.add_insecure_port("[::]:50083")
+    server.add_insecure_port("[::]:50065")
     server.start()
     server.wait_for_termination()
 
