@@ -17,7 +17,7 @@ MiddlePos_2 = [3, -3, -1, -10, 5, 2, -7, 3] #1eplace values by your calibration1
 
 
 c = Scs0009PyController(
-        serial_port="COM5",
+        serial_port="COM8",
         baudrate=1000000,
         timeout=0.05,  #0.05
     )
