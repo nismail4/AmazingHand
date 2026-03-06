@@ -6,9 +6,12 @@ nodes:
       tick: dora/timer/millis/50
     outputs:
       - r_hand_pos
+<<<<<<< HEAD
       - l_hand_pos
+=======
+>>>>>>> fca5a02964302224f748156cc04d497db726f202
 
-  - id: hand_simulation
+  - id: r_hand_simulation
     build: pip install -e AHSimulation
     path: AHSimulation/AHSimulation/mj_mink_right.py
     inputs:
@@ -23,4 +26,8 @@ nodes:
     path: target/debug/AHControl #--serialport /dev/ttyACM0 --config AHControl/config/r_hand.toml
     args: --serialport COM8 --config AHControl/config/r_hand.toml
     inputs:
+<<<<<<< HEAD
       mj_r_joints_pos: hand_simulation/mj_r_joints_pos
+=======
+      mj_r_joints_pos: r_hand_simulation/mj_r_joints_pos
+>>>>>>> fca5a02964302224f748156cc04d497db726f202
