@@ -1,13 +1,8 @@
-import argparse
-import os
-import time
-
 import cv2
-import numpy as np
-import pyarrow as pa
-from dora import Node
 import mediapipe as mp
-from scipy.spatial.transform import Rotation
+from dora import Node
+import pyarrow as pa
+import numpy as np
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
