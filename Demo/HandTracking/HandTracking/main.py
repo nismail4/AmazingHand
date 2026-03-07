@@ -159,7 +159,7 @@ def process_img(hand_proc, image):
                   l_res=[{'l_tip1': tip1,'l_tip2': tip2,'l_tip3': tip3,'l_tip4': tip4}]
                   # print(f"LEFT: {tip1_x:.3f} {tip1_y:.3f} {tip1_z:.3f} => {tip1}. {unit_x} {unit_y} {unit_z}")
     # Flip the image horizontally for a selfie-view display.
-    return image,r_res,l_res
+    return image,r_res,l_res, origin
 # cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
 
 
@@ -193,13 +193,21 @@ def main():
 
                     frame = cv2.flip(frame, 1)
                     #process
-                    frame,r_res,l_res=process_img(hands,frame)
+                    frame, r_res, l_res, r_wrist = process_img(hands,frame)
+
 
                     if r_res is not None:
                         node.send_output('r_hand_pos',pa.array(r_res))
+
+                        # Send the wrist position to the Gantry node
+                        if r_wrist is not None:
+                            node.send_output('wrist_pos', pa.array(r_wrist))
+
                     if l_res is not None:
                         node.send_output('l_hand_pos',pa.array(l_res))
                     # cv2.imshow('MediaPipe Hands', cv2.flip(frame, 1))
+                    
+
                     cv2.imshow('MediaPipe Hands', frame)
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break

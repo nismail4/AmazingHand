@@ -6,6 +6,7 @@ nodes:
       tick: dora/timer/millis/50
     outputs:
       - r_hand_pos
+      - wrist_pos
 
   - id: r_hand_simulation
     build: pip install -e AHSimulation
@@ -23,3 +24,10 @@ nodes:
     args: --serialport COM8 --config AHControl/config/r_hand.toml
     inputs:
       mj_r_joints_pos: r_hand_simulation/mj_r_joints_pos
+
+  - id: gantry_controller
+    path: "C:\\Users\\nours\\OneDrive\\Desktop\\Microbots\\microbots-opencv\\.venv\\Scripts\\python.exe"
+    args: gantry_move.py
+    inputs:
+      wrist_pos: hand_tracker/wrist_pos
+      
