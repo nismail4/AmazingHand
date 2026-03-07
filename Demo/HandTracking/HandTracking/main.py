@@ -11,6 +11,7 @@ mp_hands = mp.solutions.hands
 # https://mediapipe.readthedocs.io/en/latest/solutions/hands.html
 
 def process_img(hand_proc, image):
+    origin = None
     image.flags.writeable = False
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     results = hand_proc.process(image)
