@@ -101,7 +101,7 @@ class Client:
                 lm_damping=1.0,
             )
         else:
-            print(f"Error, unknown mode: {mode}")
+            #print(f"Error, unknown mode: {mode}")
             return -1
         # Regulate all equality constraints with the same cost.
         eq_task = mink.EqualityConstraintTask(self.model, cost=1000.0)
@@ -199,7 +199,7 @@ class Client:
                         f3_motor2=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger3_motor2")
                         f4_motor1=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger4_motor1")
                         f4_motor2=mujoco.mj_name2id(self.model,mujoco.mjtObj.mjOBJ_JOINT,"finger4_motor2")
-                        # print(f"motor1: {self.data.joint(f1_motor1).qpos} motor2: {self.data.joint(f1_motor2).qpos}")
+                        # #print(f"motor1: {self.data.joint(f1_motor1).qpos} motor2: {self.data.joint(f1_motor2).qpos}")
                         self.metadata=event["metadata"]
                         self.metadata["r_finger1"]=[0,1]
                         self.metadata["r_finger2"]=[2,3]
