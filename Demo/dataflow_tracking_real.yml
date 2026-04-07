@@ -30,4 +30,3 @@ nodes:
     args: gantry_move.py
     inputs:
       wrist_pos: hand_tracker/wrist_pos
-      
