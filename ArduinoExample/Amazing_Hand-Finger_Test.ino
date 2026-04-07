@@ -4,8 +4,8 @@ SCSCL sc;
 
 
 // Finger parameters
-int ID_1 = 1; //Change to servo ID you want to calibrate 
-int ID_2 = 2; //Change to servo ID you want to calibrate
+int ID_1 = 5; //Change to servo ID you want to calibrate 
+int ID_2 = 6; //Change to servo ID you want to calibrate
 int MiddlePos_1 = 511;  // Middle position for servo ID_1
 int MiddlePos_2 = 511;  // Middle position for servo ID_2
 

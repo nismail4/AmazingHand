@@ -4,8 +4,8 @@ import numpy as np
 from rustypot import Scs0009PyController
 
 
-ID_1 = 7 #Change to servo ID you want to calibrate 
-ID_2 = 8 #Change to servo ID you want to calibrate 
+ID_1 = 3 #Change to servo ID you want to calibrate 
+ID_2 = 4 #Change to servo ID you want to calibrate 
 MiddlePos_1 = 0 #Middle position for servo ID_1 
 MiddlePos_2 = 0 #Middle position for servo ID_2
 
@@ -19,7 +19,7 @@ c = Scs0009PyController(
 def main():
     
 
-    c.write_torque_enable(7, 7) 
+    c.write_torque_enable(1, 1) 
     #1 = On / 2 = Off / 3 = Free
     
     while True:
